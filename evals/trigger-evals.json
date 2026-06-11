@@ -1,0 +1,22 @@
+[
+  {"query": "can you take a look at my Vault.sol before I deploy to mainnet next week? it holds user deposits and I want to make sure there's nothing exploitable in the withdraw path", "should_trigger": true},
+  {"query": "here's our Anchor staking program (lib.rs) - we had a near miss last audit, can you go through it for any account validation or signer issues an attacker could hit", "should_trigger": true},
+  {"query": "review this cosmwasm contract for vulnerabilities, it's a cw20 vesting thing on a cosmos appchain. paste below", "should_trigger": true},
+  {"query": "is this contract safe to deploy? worried about reentrancy and oracle manipulation specifically", "should_trigger": true},
+  {"query": "we're a small defi team, can you do a security review of our lending pool contracts before the Sherlock contest starts", "should_trigger": true},
+  {"query": "find the bugs in this solidity code that could let someone drain the pool", "should_trigger": true},
+  {"query": "audit my smart contract", "should_trigger": true},
+  {"query": "I think someone might be able to manipulate the price feed in our perp protocol - can you check the oracle logic in these .sol files and tell me if it's exploitable with a flash loan", "should_trigger": true},
+  {"query": "go through this Rust program for our Solana NFT marketplace and flag anything where PDAs or token accounts aren't being checked properly", "should_trigger": true},
+  {"query": "we just forked Uniswap v2 and changed the fee math, can you check the changes didn't introduce any rounding or invariant bugs that could be abused", "should_trigger": true},
+  {"query": "can you write me a solidity ERC20 token with a 2% transfer tax and a max wallet limit", "should_trigger": false},
+  {"query": "how does reentrancy actually work? explain it to me like I'm new to solidity, maybe with a simple example", "should_trigger": false},
+  {"query": "my hardhat tests are failing with 'insufficient funds for gas' - can you help me figure out why the deploy script breaks", "should_trigger": false},
+  {"query": "gas is killing us, can you optimize this contract to use less gas - pack the structs and cut storage writes where you can", "should_trigger": false},
+  {"query": "review this pull request that refactors our React checkout component for any bugs before I merge", "should_trigger": false},
+  {"query": "what's the best oracle to use for a lending protocol on Base - chainlink vs pyth vs a uniswap twap?", "should_trigger": false},
+  {"query": "can you audit our AWS IAM policies and S3 bucket configs for security misconfigurations", "should_trigger": false},
+  {"query": "help me write deploy and verify scripts for these contracts on Arbitrum using foundry", "should_trigger": false},
+  {"query": "explain what a flash loan attack is and give me a few famous examples from defi history", "should_trigger": false},
+  {"query": "translate this solidity contract to vyper, keep the logic identical", "should_trigger": false}
+]

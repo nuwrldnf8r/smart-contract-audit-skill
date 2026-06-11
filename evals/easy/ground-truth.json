@@ -1,0 +1,46 @@
+{
+  "skill_name": "smart-contract-audit",
+  "evals": [
+    {
+      "id": 0,
+      "name": "solidity-lending-pool",
+      "prompt": "Can you do a security audit of this Solidity lending pool contract? It's going to hold real user funds (WETH collateral, USDC debt) so I need you to be thorough. The file is LendingPool.sol. Give me a findings report with severities.",
+      "files": ["inputs/LendingPool.sol"],
+      "ground_truth": {
+        "P1_oracle_access_control": "setOraclePair has no access control - anyone can repoint the price oracle (Critical, SC01)",
+        "P2_unchecked_erc20_return": "ERC20 transfer/transferFrom return values ignored in deposit/borrow (SC06)",
+        "P3_spot_oracle_manipulation": "collateralValueUSD reads spot reserves from a single pair, flash-loan manipulable, no TWAP/staleness (High/Critical, SC03)",
+        "P4_borrow_manipulable_health": "borrow health check relies on manipulable spot price (SC03/SC04)",
+        "P5_reentrancy_withdraw": "withdraw makes an external call before decrementing deposits - reentrancy (SC08)",
+        "P6_underflow_repay": "repay decrements debt inside unchecked block - underflow if amt > debt (SC09)",
+        "P7_centralization": "admin emergencyWithdraw with no timelock/multisig - centralization/rug risk"
+      }
+    },
+    {
+      "id": 1,
+      "name": "cosmwasm-staking",
+      "prompt": "Please audit this CosmWasm staking contract (cosmwasm_staking.rs). It's a Cosmos appchain staking vault. I want a serious security review - find everything.",
+      "files": ["inputs/cosmwasm_staking.rs"],
+      "ground_truth": {
+        "C1_addr_validate": "admin taken from raw string via Addr::unchecked, no addr_validate (input validation)",
+        "C2_funds_validation": "stake does not validate info.funds denom/amount, trusts first coin blindly",
+        "C4_unsaved_storage": "unstake sends funds but never persists the reduced STAKES balance - unsaved storage change enabling repeated drain (Critical)",
+        "C5_set_admin_auth": "set_admin has no auth check - any caller can seize admin (Critical, access control)",
+        "C6_slash_auth": "slash has no info.sender == admin check - anyone can slash any user (High, access control)",
+        "C3_silent_underflow": "unstake checked_sub.unwrap_or_default silently zeroes on underflow, corrupting accounting"
+      }
+    },
+    {
+      "id": 2,
+      "name": "solana-anchor-vault",
+      "prompt": "Security review needed on this Anchor program for a Solana vault (solana_vault.rs). Be aggressive - assume an attacker is going to try everything. Findings + severities please.",
+      "files": ["inputs/solana_vault.rs"],
+      "ground_truth": {
+        "S1_missing_signer": "withdraw authority is UncheckedAccount, not Signer - not required to sign (Critical, signer check)",
+        "S2_missing_has_one": "no has_one / constraint linking authority to vault.authority - anyone can withdraw (Critical)",
+        "S3_arithmetic_underflow": "v.balance = v.balance - amount with no checked_sub, wraps on underflow (High, arithmetic)",
+        "S4_dest_owner_unvalidated": "dest token account relationship/owner not validated (Medium, account validation)"
+      }
+    }
+  ]
+}

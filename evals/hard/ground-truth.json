@@ -1,0 +1,40 @@
+{
+  "skill_name": "smart-contract-audit",
+  "iteration": 2,
+  "evals": [
+    {
+      "id": 0, "name": "solidity-erc4626-vault",
+      "prompt": "Audit this tokenized yield vault (YieldVault.sol). It's ERC4626-style and will be used as collateral by other protocols, so be extremely thorough. Findings + severities.",
+      "files": ["inputs2/YieldVault.sol"],
+      "ground_truth": {
+        "H1_first_depositor_inflation": "deposit has no virtual shares/min liquidity; first depositor + donation inflates share price to steal later deposits (share inflation, SCWE-135)",
+        "H2_rounding_favors_user": "withdraw floors shares burned, letting repeated small withdrawals drain other holders (rounding direction, SC07)",
+        "H3_redeem_reentrancy": "redeem does external transfer before updating shares; callback token (ERC777) enables reentrancy (SC08)",
+        "H4_readonly_reentrancy": "pricePerShare is consumed by external protocols and is manipulable mid-redeem-callback (read-only reentrancy, SCWE-137)",
+        "H5_unchecked_transfer": "ERC20 transfer/transferFrom return values ignored (SC06)"
+      }
+    },
+    {
+      "id": 1, "name": "cosmwasm-rewards-reply",
+      "prompt": "Please do a deep security review of this CosmWasm reward distributor (cw_rewards.rs). Cosmos appchain, holds staked funds and a reward pool. Find everything.",
+      "files": ["inputs2/cw_rewards.rs"],
+      "ground_truth": {
+        "R1_reply_reentrancy": "claim pays via SubMsg and sets CLAIMED only in reply; a contract recipient can re-enter claim() before reply, double-claiming (reply/submsg reentrancy)",
+        "R3_broken_claimed_flag": "reply handler cannot set CLAIMED for the original sender (sender context lost), so the replay protection is non-functional",
+        "R2_unsnapshotted_pool": "reward pool/total not snapshotted, so re-entrant claims read the same pool repeatedly",
+        "R4_migrate_no_version_auth": "migrate has no cw2 version/compatibility check and no documented auth gating"
+      }
+    },
+    {
+      "id": 2, "name": "solana-staking-substitution",
+      "prompt": "Security review of this Anchor staking program (sol_staking.rs). Assume a motivated attacker. Findings + severities, please be aggressive.",
+      "files": ["inputs2/sol_staking.rs"],
+      "ground_truth": {
+        "G1_userstake_owner_unbound": "user_stake has no has_one = user / owner check; attacker can pass another user's UserStake or a look-alike, breaking accounting (account substitution)",
+        "G2_init_if_needed_reinit": "initialize uses init_if_needed with no guard; pool can be re-initialized to reset authority/reward_rate (reinitialization)",
+        "G3_unchecked_cpi_authority": "unstake uses an UncheckedAccount as the CPI transfer authority instead of a program PDA signer (missing signer/PDA authority)",
+        "G4_unstake_authorization": "combined, unstake performs no authorization binding UserStake to the signer, enabling theft from arbitrary stakes"
+      }
+    }
+  ]
+}

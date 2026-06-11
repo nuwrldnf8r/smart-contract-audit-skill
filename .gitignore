@@ -1,0 +1,23 @@
+# macOS
+.DS_Store
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Python (eval harness / tooling)
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Audit tool output
+slither-out.json
+report.md
+aderyn-report.md
+
+# Local eval run artifacts
+eval-workspace/
+iteration-*/
+*.log
