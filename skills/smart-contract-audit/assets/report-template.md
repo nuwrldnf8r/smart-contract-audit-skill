@@ -32,6 +32,13 @@ where value lives, external dependencies and trust assumptions.
 ## 3. Invariants reviewed
 The key invariants (Phase 1) the audit tested, and whether each held.
 
+### What was verified correct
+Briefly record the areas you actively checked and found sound (e.g. "burn gate preserved",
+"compliance check runs before value movement, inside `nonReentrant`", "storage layout
+upgrade-safe"). This is not filler — it signals coverage, distinguishes "reviewed and fine"
+from "not reviewed", and is what lets the reader trust the findings list is complete. A short
+table (Area | Assessment) works well.
+
 ## 4. Methodology
 Phases performed, tools run (and not run, with reason), and coverage limitations.
 
@@ -59,10 +66,33 @@ but "add `require(msg.sender == owner)` to `setOracle()` at line 142").
 ## 6. Informational & gas notes
 Non-security code quality, best-practice, and gas items, clearly separated from real risk.
 
-## 7. Centralization & operational risk
+## 7. Centralization, insider & operational risk
 Privileged roles, what each can do, key-management assumptions, and what happens if a
 privileged key is compromised or malicious. State this even if the code is "correct" — the
 largest 2025–2026 losses came from operational and governance compromise, not just code bugs.
 
-## 8. Appendix
+For each privileged power, assess **insider resistance**: assume the holder is hostile or
+compromised and the access check passes, then record the worst single action and whether the
+power is **bounded** (timelock, cap/rate-limit, price-deviation band, role separation, limits
+that apply to admins too, immutability). A table works well:
+
+| Role / power | Worst single action | Bounded? (how) | Residual insider risk |
+|--------------|---------------------|----------------|-----------------------|
+
+Unbounded powers over user funds are insider-threat (INS-class) findings — promote them into
+§5 with a severity, not just a disclosure here. The fix is to bound the power, not remove the role.
+
+## 8. Verdict
+A direct bottom line the reader can act on, per deployable unit if the system has several:
+- **GO** — no blocking issues found in scope.
+- **GO with conditions** — safe to proceed once specific items are resolved; list them as
+  concrete, verifiable gates (e.g. "fix C-1 try/catch", "run storage-layout diff green against
+  deployed bytecode", "grant role before pointing at registry").
+- **NO-GO** — do not deploy; state the blocking finding(s).
+
+State residual risk carried from prior reviews or left unresolved, and any deployment-ordering
+gates, so nothing safety-critical lives only in prose. For a re-review, reconcile against the
+prior verdict (what changed, what's still open).
+
+## 9. Appendix
 Tool output references, definitions, and any out-of-scope observations.
