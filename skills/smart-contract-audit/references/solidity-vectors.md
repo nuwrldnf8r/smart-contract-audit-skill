@@ -122,8 +122,8 @@ Not a bug in itself — an amplifier. Assume unlimited single-tx capital.
   variable between existing ones, or reordering, is a true storage collision that silently
   corrupts a live slot on upgrade. Off-by-one `__gap` or mis-packing is usually still
   upgrade-safe but orphans a slot and signals the layout wasn't checked — flag it. Verify with
-  `solc --storage-layout` and diff against the **deployed** bytecode's layout before upgrading,
-  not just the new source.
+  `solc --storage-layout` and diff against the **currently deployed version's** storage layout
+  (from the prior build artifacts / verified source), not just the new source.
 - **Confirm:** show an attacker initializing or upgrading to seize control, or a storage
   collision corrupting a critical slot after upgrade. For a `__gap`/packing nit with no
   collision, scope it as Informational (latent upgrade-hygiene), not a theft finding.
