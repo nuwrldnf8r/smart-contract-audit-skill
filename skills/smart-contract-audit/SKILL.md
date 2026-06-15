@@ -76,6 +76,9 @@ common way audits miss the important bugs.
 2. **Build a mental model of the system.** What does it do (lending, AMM, vault, bridge,
    staking, governance, NFT)? Where does value live? Who are the privileged actors? What
    are the trust assumptions and external dependencies (oracles, other protocols, tokens)?
+   For each privileged actor note not just what it *can* do but whether that power is
+   **bounded** (timelock, cap/rate-limit, role split) — an unbounded admin power is an
+   insider-threat finding, not just a disclosure (the "INS" lens; see methodology Phase 4).
 3. **Map the attack surface:** every externally callable entry point, every place value
    moves, every privileged function, every external call, every place user input reaches
    state or math.
@@ -93,7 +96,10 @@ and use `assets/report-template.md` for the deliverable.
 Follow `references/methodology.md` in full. In brief:
 
 1. **Scope & context** — establish the system model and invariants (above). Record commit
-   hash / file list so the audit is reproducible.
+   hash / file list so the audit is reproducible. If the request is a **diff/PR/fork** review,
+   treat the change as the focus but read the full functions and contracts it touches — a
+   small diff can break an invariant defined far away, and appended storage can brick an
+   upgrade (see methodology Phase 0, "Diff / delta-scoped audits").
 2. **Automated pass (hybrid)** — run static analyzers if available (Slither/Aderyn for
    Solidity, `cargo audit`/clippy for Rust). Treat their output as leads to verify, not
    findings. See `references/tooling.md`. If tools aren't installed, say so and proceed
@@ -108,7 +114,9 @@ Follow `references/methodology.md` in full. In brief:
 5. **Severity & triage** — score each finding with `references/severity-rubric.md`
    (Impact × Likelihood). Be honest about likelihood; don't inflate.
 6. **Report** — write findings using `assets/report-template.md`: each with severity,
-   location, description, a concrete exploit scenario, and a specific remediation.
+   location, description, a concrete exploit scenario, and a specific remediation. Also record
+   what you verified as *correct* (signals coverage) and end with a clear **verdict**
+   (GO / GO-with-conditions / NO-GO), listing any deployment-ordering gates and residual risk.
 7. **Verify before delivering** — re-read each finding adversarially: is it actually
    reachable and exploitable given the real access control and call paths? Remove or
    downgrade anything you can't substantiate. False positives destroy trust in the report.
@@ -141,6 +149,10 @@ spans all ecosystems):
   one, write the concrete sequence of calls an attacker makes and what they gain.
 - **Calibrate severity honestly.** Reserve Critical/High for issues with real impact and
   real reachability. Over-flagging trains the reader to ignore you.
+- **Insider resistance, not just access control.** Don't stop at "is the role check enforced."
+  Assume each privileged role is hostile/compromised and the check passes, then ask what one
+  transaction can extract or brick — and whether that power is bounded. Unbounded power over
+  user funds is an insider (INS) finding even under a trusted multisig; the fix is to bound it.
 - **No fabricated certainty.** If something is suspicious but you can't confirm it, say so
   and flag it for manual follow-up rather than asserting a vuln that isn't there.
 - **Be specific in remediation.** "Add access control" is weak. "Add `onlyOwner` to

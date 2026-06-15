@@ -48,6 +48,13 @@ Additional labels:
 - Owner can rug via an un-timelocked privileged function → Medium centralization finding
   (High impact × Low likelihood if owner is a reputable multisig; raise it if owner is a
   single EOA). Always disclose centralization risk regardless.
+- Insider/INS calibration: **bounding moves the severity.** An *unbounded* privileged power
+  over user funds (e.g. a `PRICE_SETTER` that can set any price and drain an LP, or a controller
+  that can confiscate accrued user fees in one tx) is High even under a multisig — there is no
+  timelock exit, cap, or deviation band, so one hostile/compromised signer set causes loss. Add
+  a timelock plus cap/band and the same power drops toward Medium/Low (users can react, the
+  blast radius is bounded). Score the worst single action the holder can take and credit only
+  the bounds actually enforced on-chain, not off-chain promises.
 - Floating pragma / outdated compiler → Informational.
 - Reentrancy where the naive re-entrant drain actually reverts (e.g. the unwind hits a
   Solidity 0.8 checked-underflow, so an attacker can't redeem more shares than they hold) →

@@ -27,7 +27,12 @@ reconstruct the designer's mental model.
   NFT/marketplace, stablecoin, perps — each has characteristic failure modes. Name it.
 - **Identify the actors and their powers.** Users, LPs, owner/admin, governance, keepers,
   oracles, relayers. For each privileged role: what can it do, and what happens if its key
-  is compromised or malicious? Centralization *is* a finding.
+  is compromised or malicious? Centralization *is* a finding. Go past "this role is trusted":
+  for every privileged power, ask whether it is **bounded** — timelocked, capped/rate-limited,
+  split across roles, applied even to admins, or made immutable — or whether a single
+  malicious/compromised holder can cause loss in one transaction. Unbounded power over user
+  funds is an insider-threat finding even under a "trusted" multisig (see Phase 4, Insider /
+  privileged-power abuse).
 - **Map external trust.** Every external call, oracle read, and token interaction is a
   trust assumption. Which external contracts must behave honestly for safety to hold?
 - **Follow the money.** Where does value enter, sit, and leave? Funds-at-rest and the exact
@@ -35,6 +40,21 @@ reconstruct the designer's mental model.
 
 Write a short "system summary" — this becomes the report's overview and forces you to
 confront anything you don't actually understand yet.
+
+**Diff / delta-scoped audits.** When the request is to review a specific change (a PR, a
+commit, a fork diff) rather than the whole codebase, the diff is the *focus*, not the
+boundary. A change is only safe in context:
+- Read the changed lines, then read the full functions and contracts they live in — a
+  three-line diff can break an invariant established 200 lines away.
+- Identify what the change touches: new external calls, new storage, new privileged paths,
+  altered math, altered access control. Each gets the full Phase 3 treatment.
+- For anything the diff *removes* or *reorders* (a check, a state write, a call ordering),
+  ask what previously depended on it.
+- If the change is to an upgradeable contract, run the storage-layout check below — appended
+  storage and `__gap` edits are the most common way a "small" diff bricks an upgrade.
+- State the baseline explicitly (e.g. "delta of commit X against its parent") so the reader
+  knows what was and wasn't re-reviewed. Carry forward unresolved findings from prior reviews
+  as residual risk rather than silently dropping them.
 
 ## Phase 1 — Invariant identification
 
@@ -110,7 +130,34 @@ These attacks span multiple functions or contracts and are where modern losses c
   behavior of every external protocol you depend on under stress.
 - **Upgradeability & proxies (SC10).** Uninitialized implementations (a 2025 mass-exploit
   campaign), storage-layout collisions, unauthenticated upgrades, missing
-  `_disableInitializers`, init front-running.
+  `_disableInitializers`, init front-running. For any upgradeable contract, verify the
+  **storage layout** explicitly: new variables must be *appended* (never inserted between
+  existing ones), and a trailing `__gap` must shrink by exactly the number of slots the new
+  variables consume *after packing* — an `address`+`uint8` pack into one slot, so the gap
+  drops by one, not two. Off-by-one gaps and mis-packing are usually upgrade-safe but signal
+  sloppiness; an inserted-not-appended variable is a storage collision that corrupts a live
+  slot. Confirm with `solc --storage-layout` (see `tooling.md`) and, before a real upgrade,
+  diff the layout against the **deployed** contract's bytecode, not just the new source.
+- **Operational & initialization ordering.** Multi-contract systems often only work if
+  deployment/config steps happen in a specific order — e.g. a caller must be granted a role
+  on a registry *before* it's pointed at that registry, or every call through it reverts and
+  the dependent function bricks until the role lands. Trace each cross-contract dependency a
+  privileged setter creates and ask: *if these two transactions land out of order, what
+  breaks, and is there a window where funds or functionality are stuck?* Surface required
+  ordering as an explicit deployment-checklist gate, not buried prose.
+- **Insider / privileged-power abuse (the "INS" lens).** Distinct from "is access control
+  enforced" (Phase 3) — here you *assume* the role check passes and the holder is hostile or
+  compromised, then ask what they can extract or brick. A contract can be fully role-correct
+  and still fail this. For each privileged function, classify the worst single action (confiscate
+  fees, repoint the price oracle, mint, pause-and-extract, drain via an "admin rescue" path) and
+  check what *bounds* it: timelock/delay giving users an exit, hard caps or rate-limits on the
+  amount/parameter, deviation bands on prices, role separation (proposer ≠ executor, setter ≠
+  upgrader), limits that apply to admins too, and immutability of the most dangerous params.
+  An unbounded power over user funds is an insider finding regardless of how reputable the
+  holder is — score it by the worst action and how much the bounds (or their absence) constrain
+  it. (E.g. an unbounded `PRICE_SETTER` that lets one role set a rigged price to drain an LP, or
+  a fee controller that can confiscate accrued user fees, are INS-class findings whose fix is to
+  *bound* the power, not to remove the role.)
 - **Governance.** Flash-loan-amplified voting, timelock bypass, weak quorum, malicious
   proposal execution with unbounded gas.
 - **DoS / griefing.** Unbounded loops over attacker-growable arrays, gas-limited external
@@ -119,7 +166,19 @@ These attacks span multiple functions or contracts and are where modern losses c
 Remember the 2025–2026 trend: the biggest losses increasingly chain *small* bugs together,
 or come from operational/governance failures (compromised multisig signers, social
 engineering of a security council) rather than a single code bug. Where the contract grants
-sweeping admin power, flag the operational risk explicitly even if the code is "correct."
+sweeping admin power, flag the operational risk explicitly even if the code is "correct." This
+is exactly why the insider/INS lens above is not optional: the dominant loss vector now is a
+privileged actor turning hostile, so an unbounded admin power is a live threat, not a
+theoretical one.
+
+**Maintaining threat-intel priors.** The dated incident references throughout this skill (the
+2025 uninitialized-proxy mass-exploit campaign, Balancer V2's ~$128M rounding loss in Nov 2025,
+the signer-compromise trend) are *detection priors*, not background reading: each is welded to a
+specific check. Keep new intel in that shape — a one-line, dated prior attached to the vector it
+should make you test — and refresh it periodically. Do **not** grow a standalone "recent hacks"
+catalogue: decoupled from a check it ages into noise and bloats context. Live/dynamic intel
+gathering (pulling current advisories or incidents for the protocol class) is a separate concern
+and should not live in this skill's always-loaded surface.
 
 ## Phase 5 — Severity, triage, and reporting
 
