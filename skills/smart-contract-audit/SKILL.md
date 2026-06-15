@@ -116,7 +116,7 @@ Follow `references/methodology.md` in full. In brief:
 6. **Report** — write findings using `assets/report-template.md`: each with severity,
    location, description, a concrete exploit scenario, and a specific remediation. Also record
    what you verified as *correct* (signals coverage) and end with a clear **verdict**
-   (GO / GO-with-conditions / NO-GO), listing any deployment-ordering gates and residual risk.
+   (GO / GO with conditions / NO-GO), listing any deployment-ordering gates and residual risk.
 7. **Verify before delivering** — re-read each finding adversarially: is it actually
    reachable and exploitable given the real access control and call paths? Remove or
    downgrade anything you can't substantiate. False positives destroy trust in the report.

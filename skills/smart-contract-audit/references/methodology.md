@@ -137,7 +137,8 @@ These attacks span multiple functions or contracts and are where modern losses c
   drops by one, not two. Off-by-one gaps and mis-packing are usually upgrade-safe but signal
   sloppiness; an inserted-not-appended variable is a storage collision that corrupts a live
   slot. Confirm with `solc --storage-layout` (see `tooling.md`) and, before a real upgrade,
-  diff the layout against the **deployed** contract's bytecode, not just the new source.
+  diff the layout against the **previously deployed implementation's** known layout (from prior
+  build artifacts or verified source), not just the new source.
 - **Operational & initialization ordering.** Multi-contract systems often only work if
   deployment/config steps happen in a specific order — e.g. a caller must be granted a role
   on a registry *before* it's pointed at that registry, or every call through it reverts and

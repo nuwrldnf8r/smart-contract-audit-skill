@@ -45,16 +45,16 @@ Additional labels:
   (treat flash-loan capital as available → Medium-High likelihood).
 - Rounding favoring the user by 1 wei per op, only meaningful if looped thousands of times
   for cents → Low/Informational unless you can show real extraction.
-- Owner can rug via an un-timelocked privileged function → Medium centralization finding
-  (High impact × Low likelihood if owner is a reputable multisig; raise it if owner is a
-  single EOA). Always disclose centralization risk regardless.
-- Insider/INS calibration: **bounding moves the severity.** An *unbounded* privileged power
-  over user funds (e.g. a `PRICE_SETTER` that can set any price and drain an LP, or a controller
-  that can confiscate accrued user fees in one tx) is High even under a multisig — there is no
-  timelock exit, cap, or deviation band, so one hostile/compromised signer set causes loss. Add
-  a timelock plus cap/band and the same power drops toward Medium/Low (users can react, the
-  blast radius is bounded). Score the worst single action the holder can take and credit only
-  the bounds actually enforced on-chain, not off-chain promises.
+- Centralization / insider (INS) risk — **bounding moves the severity.** An *unbounded*
+  privileged power over user funds (no timelock, cap, or deviation band) is **High** regardless
+  of multisig reputation — a single hostile/compromised signer set causes loss (e.g. a
+  `PRICE_SETTER` that can freely reprice an LP, or an admin that can confiscate accrued user
+  fees in one tx). Add a timelock plus cap/band and the same power drops toward Medium/Low
+  (users can react, blast radius is bounded). A *bounded* power held by a single EOA sits
+  higher on the likelihood axis than the same power held by a reputable multisig, but neither
+  converts an unbounded power to Medium. Score the worst single action the holder can take and
+  credit only the bounds enforced on-chain, not off-chain promises. Always disclose
+  centralization risk regardless.
 - Floating pragma / outdated compiler → Informational.
 - Reentrancy where the naive re-entrant drain actually reverts (e.g. the unwind hits a
   Solidity 0.8 checked-underflow, so an attacker can't redeem more shares than they hold) →
