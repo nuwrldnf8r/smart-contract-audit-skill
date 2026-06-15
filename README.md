@@ -7,7 +7,7 @@ A rigorous, multi-ecosystem **security audit skill** for [Claude](https://claude
 to review real smart-contract and on-chain program code for vulnerabilities, exploits, and
 attack vectors across three ecosystems:
 
-- **Solidity / EVM**
+- **Solidity & Vyper / EVM** (including L2, cross-chain/bridge, and account-abstraction concerns)
 - **CosmWasm** (Rust / Cosmos)
 - **Solana** (Rust / Anchor & native)
 
@@ -40,8 +40,9 @@ The skill follows a seven-phase methodology (Phases 0–6):
 1. **Invariants** — the properties that must always hold; most high-severity findings break one.
 2. **Automated pass** — Slither / Aderyn / cargo-audit if installed (leads to verify, not findings).
 3. **Manual review** — function-by-function against an ecosystem vector catalogue + the invariants.
-4. **Cross-cutting analysis** — oracle manipulation, flash-loan amplification, rounding/precision,
-   MEV/ordering, composability, upgradeability, governance, and insider/privileged-power abuse.
+4. **Cross-cutting analysis** — oracle manipulation (incl. L2 sequencer-uptime), flash-loan
+   amplification, rounding/precision, MEV/ordering, composability, upgradeability, cross-chain/
+   bridge messaging, account abstraction, governance, and insider/privileged-power abuse.
 5. **Severity & report** — score each finding Impact × Likelihood and write it up with an exploit
    path and a specific fix.
 6. **Adversarial self-verification** — re-derive each finding's exploit path before it ships;
