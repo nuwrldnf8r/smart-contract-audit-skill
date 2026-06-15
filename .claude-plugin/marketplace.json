@@ -8,7 +8,7 @@
     {
       "name": "smart-contract-audit",
       "source": "./",
-      "description": "Rigorous, attacker-centric security audit of smart-contract / on-chain program code in Solidity (EVM), CosmWasm (Cosmos), and Solana (Anchor & native).",
+      "description": "Rigorous, attacker-centric security audit of smart-contract / on-chain program code in Solidity or Vyper (EVM), CosmWasm (Cosmos), and Solana (Anchor & native).",
       "version": "1.0.0"
     }
   ]

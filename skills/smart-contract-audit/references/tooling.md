@@ -21,7 +21,8 @@ python3 -m venv ~/.slither
 export PATH="$HOME/.slither/bin:$PATH"   # add to your shell rc so `slither` resolves
 solc-select install 0.8.24 && solc-select use 0.8.24
 
-# Equivalent alternatives (pick one): `pipx install slither-analyzer solc-select`,
+# Equivalent alternatives (pick one): pipx
+# (`pipx install slither-analyzer && pipx install solc-select` — one package per call),
 # `brew install slither-analyzer`, or plain pip
 # (`pip3 install slither-analyzer solc-select`; add --break-system-packages if needed).
 

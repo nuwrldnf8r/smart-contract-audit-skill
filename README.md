@@ -1,7 +1,7 @@
 # smart-contract-audit
 
 > A **Claude skill** (Claude Code / Claude.ai / Cowork) for auditing smart-contract and on-chain
-> program code — Solidity, Solana, and CosmWasm — for vulnerabilities and exploits.
+> program code — Solidity/Vyper, Solana, and CosmWasm — for vulnerabilities and exploits.
 
 A rigorous, multi-ecosystem **security audit skill** for [Claude](https://claude.com) — built
 to review real smart-contract and on-chain program code for vulnerabilities, exploits, and
