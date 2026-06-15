@@ -1,7 +1,7 @@
 {
   "name": "smart-contract-audit",
   "displayName": "Smart Contract Audit",
-  "description": "Rigorous, attacker-centric security audit of smart-contract / on-chain program code in Solidity or Vyper (EVM), CosmWasm (Cosmos), and Solana (Anchor & native). Produces a severity-rated findings report with exploit paths, insider-resistance analysis, and a deploy verdict.",
+  "description": "Rigorous, attacker-centric security audit of smart-contract / on-chain program code in Solidity/Vyper (EVM), CosmWasm (Cosmos), and Solana (Anchor & native). Produces a severity-rated findings report with exploit paths, insider-resistance analysis, and a deploy verdict.",
   "version": "1.0.0",
   "author": {
     "name": "Gavin Marshall",

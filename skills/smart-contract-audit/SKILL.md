@@ -1,7 +1,7 @@
 ---
 name: smart-contract-audit
 description: >-
-  Rigorous security audit of smart-contract / on-chain program code in Solidity or Vyper (EVM),
+  Rigorous security audit of smart-contract / on-chain program code in Solidity/Vyper (EVM),
   CosmWasm (Rust/Cosmos), or Solana (Rust/Anchor & native). Use whenever the user wants their
   contract or program code reviewed for vulnerabilities, exploits, or attack vectors —
   e.g. "audit/security-review this contract", "is this safe to deploy?", "can someone drain or
