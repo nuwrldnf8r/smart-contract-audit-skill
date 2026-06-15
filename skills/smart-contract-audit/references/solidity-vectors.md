@@ -33,6 +33,14 @@ Unauthorized callers reaching privileged functions or critical state.
 - **Confirm:** trace the call graph to the sensitive sink; verify *no* path reaches it
   without the intended check. Check that modifiers are actually on the externally-reachable
   function, not just an internal helper.
+- **Insider resistance (INS lens).** Enforced access control is necessary but not sufficient.
+  Separately assume each privileged role is hostile/compromised *and the check passes*, then
+  ask what one transaction can extract or brick (confiscate fees, repoint the oracle, mint,
+  pause-and-extract, "rescue"-drain). For each such power check whether it is **bounded** —
+  timelock/delay, hard cap or rate-limit, price-deviation band, role separation (setter ≠
+  upgrader, proposer ≠ executor), limits that apply to admins too, immutability of the worst
+  params. An unbounded power over user funds is an INS-class finding even under a reputable
+  multisig; the fix is to *bound* it, not to delete the role. See methodology Phase 4.
 
 ## SC02 — Business Logic Vulnerabilities
 Design-level flaws that break intended economic/functional rules even when low-level checks
@@ -107,8 +115,18 @@ Not a bug in itself — an amplifier. Assume unlimited single-tx capital.
   campaign in 2025); storage-layout collision on upgrade (SCWE-099/150); unauthenticated
   upgrade or beacon upgrade (SCWE-118); init front-running (SCWE-098); `selfdestruct` in
   implementation (SCWE-117); shared proxy-admin/logic-owner key (SCWE-119).
+- **Storage-layout discipline (upgrade-safety, even without an attacker).** New state in an
+  upgradeable contract must be *appended* after existing vars, and any trailing `__gap` must
+  shrink by exactly the number of slots the additions consume **after packing** (e.g. an
+  `address` + a `uint8` share one 32-byte slot, so the gap drops by 1, not 2). Inserting a
+  variable between existing ones, or reordering, is a true storage collision that silently
+  corrupts a live slot on upgrade. Off-by-one `__gap` or mis-packing is usually still
+  upgrade-safe but orphans a slot and signals the layout wasn't checked — flag it. Verify with
+  `solc --storage-layout` and diff against the **currently deployed version's** storage layout
+  (from the prior build artifacts / verified source), not just the new source.
 - **Confirm:** show an attacker initializing or upgrading to seize control, or a storage
-  collision corrupting a critical slot after upgrade.
+  collision corrupting a critical slot after upgrade. For a `__gap`/packing nit with no
+  collision, scope it as Informational (latent upgrade-hygiene), not a theft finding.
 
 ## Cross-cutting
 
@@ -122,7 +140,14 @@ is predictable/manipulable (SCWE-024/084/153). Require a VRF.
 
 **DoS / griefing.** Unbounded loops over attacker-growable structures (SCWE-109/148); push
 payments that revert; gas-limited calls; unbounded withdrawal queue (SCWE-126); locked ether
-with no withdrawal path (SCWE-140).
+with no withdrawal path (SCWE-140). Also: a call into an external dependency (compliance
+registry, allowlist, oracle) on a core path (e.g. inside `_update`/transfer) that can
+**revert** instead of returning a status, and isn't wrapped in `try/catch`, bricks that path
+for affected accounts. Distinguish *fail-closed for theft* (a revert blocks the action — safe
+against loss) from *availability* (the same revert is an unintended DoS): if the dependency's
+interface says "a revert MUST be treated as not-approved," the caller must `try/catch` and map
+a revert to the not-approved branch, and the two layers of a system should handle it
+consistently. Rate these as availability findings, usually Low/Medium, not theft.
 
 **MEV / ordering.** Sandwichable swaps, missing slippage/deadline, `permit()` front-running
 nonce DoS, commit-reveal absence on sensitive flows.
