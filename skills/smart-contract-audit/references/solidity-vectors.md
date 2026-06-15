@@ -59,9 +59,16 @@ pass. Now among the costliest classes and invisible to linters.
   insufficient TWAP window or single observation (SCWE-113); decimal mismatch in price math
   (SCWE-088); admin-writable oracle without delay (SCWE-130); unvalidated min/max bands
   (SCWE-085).
+- **L2 sequencer uptime.** On an L2 (Arbitrum, Optimism, Base, etc.), a Chainlink price read is
+  only safe if the contract also checks the **L2 sequencer-uptime feed**: when the sequencer has
+  been down, the last price is stale and resumes without intermediate updates, so liquidations
+  and borrows can execute against a price that no longer reflects the market. Look for direct
+  Chainlink reads on an L2 deployment with no sequencer-uptime check (and no grace-period after
+  the sequencer restarts). Missing this is a real, repeatedly-exploited oracle bug.
 - **Confirm:** show that manipulating the source within one block/tx (often via flash loan)
   moves the protocol's reference price enough to borrow under-collateralized, trigger unfair
-  liquidation, or misprice a swap.
+  liquidation, or misprice a swap — or, for the L2 case, that a stale post-downtime price lets a
+  position be liquidated/borrowed against unfairly.
 
 ## SC04 — Flash-Loan-Facilitated Attacks
 Not a bug in itself — an amplifier. Assume unlimited single-tx capital.
@@ -152,6 +159,22 @@ consistently. Rate these as availability findings, usually Low/Medium, not theft
 **MEV / ordering.** Sandwichable swaps, missing slippage/deadline, `permit()` front-running
 nonce DoS, commit-reveal absence on sensitive flows.
 
+**Cross-chain / bridge messaging.** For any contract that sends or receives cross-chain messages
+(native bridge, LayerZero, CCIP, Wormhole, Axelar, custom): validate the **source chain and
+source sender** of every inbound message (not just that *a* message arrived), enforce
+message-replay protection (per-message nonce/hash consumed once), and confirm the trust model of
+the underlying messaging layer (who can forge/relay, and what finality is assumed). A handler
+that acts on `payload` without checking `srcChainId`/`srcAddress` against an allowlist is the
+canonical bridge drain. Watch for chains where messages can be re-delivered or reordered, and for
+optimistic bridges where a fraud-proof window must elapse before funds are released.
+
+**Account abstraction (ERC-4337 / smart-contract wallets).** Don't assume `msg.sender` is an EOA.
+`tx.origin == msg.sender` checks (used as "is this a direct call / not a contract") break for
+4337 wallets and can lock them out or be bypassed. Signature checks must support **EIP-1271**
+(`isValidSignature`) for contract wallets, not only `ecrecover`. In a 4337 context, be wary of
+validation-phase storage-access rules and of trusting the bundler/paymaster; `tx.origin` is the
+bundler, not the user.
+
 ## Token integration & "weird ERC20s"
 A huge share of integration bugs come from assuming all tokens behave like a textbook ERC20:
 - Missing return values (USDT) — use `SafeERC20`.
@@ -191,4 +214,8 @@ Use these to locate surface fast, then review manually — never report from gre
 - `initialize`, `initializer`, `_disableInitializers` → proxy init
 - `getReserves`, `slot0`, `balanceOf(` in pricing → oracle manipulation
 - `onERC721Received`, `tokensReceived`, `safeTransfer` → callback reentrancy
+- `latestRoundData`, `sequencerUptimeFeed` → oracle staleness / L2 sequencer-uptime check
+- `srcChainId`, `srcAddress`, `lzReceive`, `_ccipReceive`, `receiveWormholeMessages` → cross-chain source validation
+- `isValidSignature`, `tx.origin == msg.sender` → EIP-1271 / account-abstraction assumptions
 - `pragma solidity ^` (floating, SCWE-060) and old versions (SCWE-061)
+- `# @version` / `.vy` → Vyper: confirm the exact compiler version (codegen/reentrancy history)

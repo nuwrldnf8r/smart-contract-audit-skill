@@ -14,16 +14,17 @@ the sandbox/workspace, never against untrusted code on a sensitive host beyond t
 Install it once in the environment where audits run (Python 3.8+ required); the audit then
 picks it up off PATH automatically.
 ```
-# Preferred: isolated install via pipx (keeps `slither` on PATH, no env conflicts).
-# If pipx isn't installed yet:
-python3 -m pip install --user pipx && python3 -m pipx ensurepath   # then restart the shell
-pipx install slither-analyzer
-pipx install solc-select        # manage compiler versions Slither needs
+# Preferred: isolated venv (cleanest on modern PEP 668 "externally-managed" Python).
+# This matches docs/install.md and the README quickstart.
+python3 -m venv ~/.slither
+~/.slither/bin/pip install slither-analyzer solc-select
+export PATH="$HOME/.slither/bin:$PATH"   # add to your shell rc so `slither` resolves
 solc-select install 0.8.24 && solc-select use 0.8.24
 
-# Plain-pip fallback if you don't want pipx:
-#   pip3 install slither-analyzer solc-select
-#   (on externally-managed Python, add --break-system-packages, ideally inside a venv)
+# Equivalent alternatives (pick one): pipx
+# (`pipx install slither-analyzer && pipx install solc-select` — one package per call),
+# `brew install slither-analyzer`, or plain pip
+# (`pip3 install slither-analyzer solc-select`; add --break-system-packages if needed).
 
 slither --version               # confirm it's on PATH
 slither . --json slither-out.json   # run: whole project, or `slither path/to/Contract.sol`

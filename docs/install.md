@@ -2,10 +2,25 @@
 
 ## 1. Install the skill
 
+### Option A — Claude Code plugin (recommended)
+
+This repo ships a Claude Code plugin marketplace, so the fastest install is:
+
+```text
+/plugin marketplace add nuwrldnf8r/smart-contract-audit-skill
+/plugin install smart-contract-audit@smart-contract-tools
+```
+
+`/plugin marketplace add` registers the marketplace defined in `.claude-plugin/marketplace.json`;
+`/plugin install` then pulls in the `smart-contract-audit` plugin (whose skill lives under
+`skills/`).
+
+### Option B — Copy the skill directory
+
 Copy the skill directory into your Claude skills location:
 
 - **Claude Code:** place `skills/smart-contract-audit/` where your other skills live (e.g.
-  `~/.claude/skills/smart-contract-audit/`), or load it via your plugin/marketplace setup.
+  `~/.claude/skills/smart-contract-audit/`).
 - **Cowork / desktop:** use the "Save skill" flow with a packaged `.skill` (zip the skill
   directory and rename to `smart-contract-audit.skill`), or drop the folder into your skills
   directory.
