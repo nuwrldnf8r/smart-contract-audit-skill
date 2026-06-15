@@ -1,5 +1,8 @@
 # smart-contract-audit
 
+> A **Claude skill** (Claude Code / Claude.ai / Cowork) for auditing smart-contract and on-chain
+> program code — Solidity, Solana, and CosmWasm — for vulnerabilities and exploits.
+
 A rigorous, multi-ecosystem **security audit skill** for [Claude](https://claude.com) — built
 to review real smart-contract and on-chain program code for vulnerabilities, exploits, and
 attack vectors across three ecosystems:
@@ -18,21 +21,31 @@ cargo-audit) and falls back to thorough manual review when they aren't.
 
 A severity-rated findings report. Each finding includes its location, a concrete exploit
 scenario (the actual sequence of calls an attacker makes and what they gain), and a specific,
-actionable remediation — plus a centralization / operational-risk section. Severities are
-scored Impact × Likelihood, with an explicit discipline against over-claiming.
+actionable remediation. Severities are scored Impact × Likelihood, with an explicit discipline
+against over-claiming. The report also carries:
+
+- An **insider-resistance ("INS") analysis** — for each privileged role, it assumes the role
+  check *passes* and the holder is hostile or compromised, then asks what one transaction can
+  extract or brick and whether that power is **bounded** (timelock, cap/rate-limit, deviation
+  band, role separation). An unbounded power over user funds is reported as a finding even under
+  a "trusted" multisig — the dominant 2025–2026 loss vector.
+- A clear **deployment verdict** — **GO / GO-with-conditions / NO-GO**, with any required
+  deployment-ordering gates and residual risk stated explicitly rather than buried in prose.
 
 ## How it works
 
-The skill follows a six-phase methodology:
+The skill follows a seven-phase methodology (Phases 0–6):
 
-1. **Scope & system model** — what the protocol does, who holds privilege, where value lives.
-2. **Invariants** — the properties that must always hold; most high-severity findings break one.
-3. **Automated pass** — Slither / Aderyn / cargo-audit if installed (leads to verify, not findings).
-4. **Manual review** — function-by-function against an ecosystem vector catalogue + the invariants.
-5. **Cross-cutting analysis** — oracle manipulation, flash-loan amplification, rounding/precision,
-   MEV/ordering, composability, upgradeability, governance.
-6. **Severity, report & adversarial self-verification** — re-derive each finding's exploit path
-   before it ships; remove anything that can't be substantiated.
+0. **Scope & system model** — what the protocol does, who holds privilege, where value lives.
+1. **Invariants** — the properties that must always hold; most high-severity findings break one.
+2. **Automated pass** — Slither / Aderyn / cargo-audit if installed (leads to verify, not findings).
+3. **Manual review** — function-by-function against an ecosystem vector catalogue + the invariants.
+4. **Cross-cutting analysis** — oracle manipulation, flash-loan amplification, rounding/precision,
+   MEV/ordering, composability, upgradeability, governance, and insider/privileged-power abuse.
+5. **Severity & report** — score each finding Impact × Likelihood and write it up with an exploit
+   path and a specific fix.
+6. **Adversarial self-verification** — re-derive each finding's exploit path before it ships;
+   remove anything that can't be substantiated.
 
 The vulnerability catalogues are grounded in the OWASP Smart Contract Top 10 (2026), the OWASP
 SCWE weakness registry, the Sealevel attack classes (Solana), and CosmWasm audit practice.
@@ -41,6 +54,9 @@ SCWE weakness registry, the Sealevel attack classes (Solana), and CosmWasm audit
 
 ```
 .
+├── .claude-plugin/                # Claude Code plugin + marketplace manifests
+│   ├── plugin.json
+│   └── marketplace.json
 ├── skills/
 │   └── smart-contract-audit/      # the skill itself
 │       ├── SKILL.md               # entry point: workflow + routing
@@ -56,7 +72,19 @@ SCWE weakness registry, the Sealevel attack classes (Solana), and CosmWasm audit
 
 ## Installation
 
-### The skill
+### As a Claude Code plugin (recommended)
+
+This repo is also a Claude Code plugin marketplace, so you can install it in two commands:
+
+```text
+/plugin marketplace add nuwrldnf8r/smart-contract-audit-skill
+/plugin install smart-contract-audit@smart-contract-tools
+```
+
+The skill then activates automatically when you ask Claude to audit or security-review on-chain
+code.
+
+### As a plain skill
 
 Copy `skills/smart-contract-audit/` into your Claude skills directory (Claude Code, or the
 Cowork/desktop skills folder). The skill activates automatically when you ask Claude to audit

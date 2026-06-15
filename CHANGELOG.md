@@ -10,8 +10,9 @@ Initial release.
 ### Added
 - `smart-contract-audit` skill covering **Solidity/EVM**, **CosmWasm (Cosmos)**, and
   **Solana (Anchor & native)**.
-- Six-phase attacker-centric methodology (scope → invariants → automated pass → manual review →
-  cross-cutting/economic analysis → severity + adversarial self-verification).
+- Seven-phase attacker-centric methodology, Phases 0–6 (scope → invariants → automated pass →
+  manual review → cross-cutting/economic analysis → severity & report → adversarial
+  self-verification).
 - Per-ecosystem vulnerability catalogues grounded in OWASP Smart Contract Top 10 (2026), the
   OWASP SCWE registry, the Sealevel attack classes, and CosmWasm audit practice.
 - Impact × Likelihood severity rubric with calibration examples, and a standard report template.

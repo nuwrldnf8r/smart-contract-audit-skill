@@ -1,12 +1,12 @@
 ---
 name: smart-contract-audit
 description: >-
-  Rigorous security audit of smart-contract / on-chain program code in Solidity (EVM),
+  Rigorous security audit of smart-contract / on-chain program code in Solidity or Vyper (EVM),
   CosmWasm (Rust/Cosmos), or Solana (Rust/Anchor & native). Use whenever the user wants their
-  actual contract or program code reviewed for vulnerabilities, exploits, or attack vectors —
+  contract or program code reviewed for vulnerabilities, exploits, or attack vectors —
   e.g. "audit/security-review this contract", "is this safe to deploy?", "can someone drain or
   exploit this?", before a mainnet deploy or audit contest, on a fork or diff, or when they paste
-  .sol/.rs code and ask what could go wrong. Trigger even without the word "audit" and for a
+  .sol/.vy/.rs code and ask what could go wrong. Trigger without the word "audit" and for a
   single contract; covers reentrancy, oracle manipulation, access control, flash-loan,
   proxy/upgradeability, PDA/account validation, and economic/logic bugs, and yields a findings
   report with severities. Do NOT trigger when the user only wants to: explain or learn a concept;
@@ -70,9 +70,17 @@ common way audits miss the important bugs.
 
 1. **Identify the ecosystem(s)** from file extensions and imports:
    - `.sol`, `pragma solidity`, OpenZeppelin imports → **Solidity** → read `references/solidity-vectors.md`
+   - `.vy`, `# @version`, `@external`/`@nonreentrant` decorators → **Vyper** (also EVM) → use
+     `references/solidity-vectors.md` (the EVM/economic vectors all apply), but adjust for Vyper
+     semantics: visibility is explicit via decorators, reentrancy is guarded with
+     `@nonreentrant("lock")` rather than a modifier, there is no `unchecked`/inline-assembly story
+     (arithmetic is checked by default), and historically the *compiler itself* has shipped
+     reentrancy/codegen bugs — so pin and note the exact Vyper version.
    - `.rs` with `cosmwasm_std`, `#[entry_point]`, `cw-storage-plus` → **CosmWasm** → read `references/cosmwasm-vectors.md`
    - `.rs` with `anchor_lang`, `solana_program`, `#[program]`, `Accounts` → **Solana** → read `references/solana-vectors.md`
-   - A repo may contain more than one. Audit each with its own reference.
+   - A repo may contain more than one. Audit each with its own reference. For an ecosystem with
+     no dedicated reference here (Move/Sui/Aptos, Cairo/Starknet, ink!/Substrate, Soroban), fall
+     back to `methodology.md` + the cross-cutting/economic analysis and say so in the report.
 2. **Build a mental model of the system.** What does it do (lending, AMM, vault, bridge,
    staking, governance, NFT)? Where does value live? Who are the privileged actors? What
    are the trust assumptions and external dependencies (oracles, other protocols, tokens)?
