@@ -169,9 +169,10 @@ canonical bridge drain. Watch for chains where messages can be re-delivered or r
 optimistic bridges where a fraud-proof window must elapse before funds are released.
 
 **Account abstraction & delegated EOAs (EIP-7702, ERC-4337, EIP-1271).** Don't assume `msg.sender`
-or `tx.origin` is a code-free EOA. Post-Pectra, an EOA can delegate to contract code via EIP-7702,
-so the "EOAs have no code" assumption is now false on mainnet. This breaks a class of legacy checks
-and adds new surface:
+or `tx.origin` is a code-free EOA. Where EIP-7702 is activated (Ethereum mainnet post-Pectra, and
+other chains as they adopt it — confirm for the target chain), an EOA can delegate to contract code,
+so the "EOAs have no code" assumption no longer holds. This breaks a class of legacy checks and adds
+new surface:
 - **`tx.origin` / `msg.sender == tx.origin` is no longer an EOA test.** Code that uses it for
   authorization, or as an anti-contract / anti-reentrancy ("only humans") guard, is broken — a
   7702-delegated EOA is an `origin` *and* runs code, and can re-enter. Treat any such check as a

@@ -75,9 +75,11 @@ requirement** the team must verify before/at launch, and record them in the Assu
 
 ## How to verify (when addresses are available)
 
-- Read storage slots directly: ERC-1967 implementation slot
-  (`0x360894...bbc`), admin slot (`0xb53127...103`), beacon slot. Use `eth_getStorageAt` /
-  `cast storage` / a block explorer's read-proxy view.
+- Read storage slots directly (EIP-1967 constants): implementation slot
+  `0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc`, admin slot
+  `0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103`, beacon slot
+  `0xa3f0ad74e5423aebfd80d3ef4346578335a9a72aeaee59ff6cb3582b35133d50`. Use `eth_getStorageAt` /
+  `cast storage` / a block explorer's read-proxy view. (Authoritative source: EIP-1967.)
 - Read owner/role getters, timelock `getMinDelay()`, and multisig threshold/owners on-chain.
 - Cross-check every configured external address against the official deployment list for that
   chain ID. Do **not** call untrusted endpoints (see `repo-execution-safety.md`).

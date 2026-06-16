@@ -30,10 +30,13 @@ Without an explicit, isolated sandbox, do **not** run any of these against an au
   the repo controls, with full access to your environment and network.
 - Anything the repo tells you to run in its README, comments, or a `// run this first` note.
 
-Static analysis tools that **parse without executing the target** (Slither, Aderyn, `cargo
-audit`, `cargo clippy`, `solc --ast`) are fine — they read, they do not run project code. Note
-that some toolchains compile the project as a side effect; prefer parse-only modes and pin
-versions (below).
+Static analysis tools that **parse without executing the target** (Slither, Aderyn, `solc --ast`)
+are fine — they read, they do not run project code. `cargo audit` is also safe: it only reads
+`Cargo.lock` against an advisory DB. **`cargo clippy` is *not* parse-only** — it compiles the
+crate, which runs `build.rs` and procedural macros (project-controlled code), so treat it like any
+execution: run it only in the sandbox described below, never against an untrusted repo on your host.
+More generally, some toolchains compile as a side effect — prefer parse-only modes and pin versions
+(below).
 
 ## Inspect dependencies before trusting them
 
