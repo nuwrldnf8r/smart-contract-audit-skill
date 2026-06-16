@@ -3,6 +3,23 @@
 All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.2.0] — 2026-06-16
+
+### Added
+- **Protocol-class playbooks** (progressive-disclosure references, read only when the protocol
+  type matches):
+  - `references/protocol-erc4626-vault.md` — tokenized/yield vaults: first-depositor/donation
+    share inflation, rounding direction, `totalAssets` integrity & read-only reentrancy, weird
+    assets, integrator/slippage footguns.
+  - `references/protocol-lending.md` — money markets/CDPs: oracle & collateral valuation,
+    health-factor math & accrual ordering, liquidation/bad-debt, receipt-token inflation, caps/modes.
+  - `references/protocol-amm-dex.md` — AMMs: invariant/swap rounding, first-liquidity
+    manipulation, spot-price-as-oracle, reserve desync, flash-swap/hook reentrancy, slippage/MEV,
+    and v3/v4 + stableswap specifics.
+- Wired into `SKILL.md` and `methodology.md` Phase 0: classify the protocol, then read the
+  matching playbook alongside the ecosystem vectors. Other classes (staking, bridge, governance,
+  perps, NFT) intentionally have no dedicated playbook yet — they use the cross-cutting analysis.
+
 ## [1.1.0] — 2026-06-16
 
 Shift from contract-code audit toward protocol-in-context audit.

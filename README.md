@@ -54,6 +54,10 @@ key/secret hygiene, prompt-injection awareness), audits **deployment and live on
 (proxy/upgrade authority, timelock delay, multisig health, chain-ID address correctness), and
 records an **assumption ledger** plus a **proof/reproduction** for High/Critical findings.
 
+On top of the per-ecosystem catalogues it carries **protocol-class playbooks** — dense,
+class-specific checklists for ERC-4626/tokenized vaults, lending/CDP markets, and AMMs/DEXes —
+pulled in only when the protocol type matches.
+
 The vulnerability catalogues are grounded in the OWASP Smart Contract Top 10 (2026), the OWASP
 SCWE weakness registry, the Sealevel attack classes (Solana), and CosmWasm audit practice. EVM
 coverage includes post-Pectra account abstraction (EIP-7702 / ERC-4337 / EIP-1271). VMs without a
@@ -71,7 +75,8 @@ dedicated catalogue (Move, Cairo, Soroban, ink!, Clarity) get a general logic/ec
 │   └── smart-contract-audit/      # the skill itself
 │       ├── SKILL.md               # entry point: workflow + routing
 │       ├── references/            # methodology, per-ecosystem vectors, severity, tooling,
-│       │                          #   repo-execution safety, deployment/live-state
+│       │                          #   repo-execution safety, deployment/live-state,
+│       │                          #   protocol playbooks (vault / lending / AMM)
 │       └── assets/                # the audit report template (incl. assumption ledger + PoC)
 ├── evals/                         # reproducible evaluation harness
 │   ├── easy/                      # classic planted-bug contracts + ground truth

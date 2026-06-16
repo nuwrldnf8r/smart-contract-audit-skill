@@ -24,7 +24,10 @@ reconstruct the designer's mental model.
   hash or file checksums, and note dependencies (libraries, oracles, external protocols).
   An audit must be reproducible against a fixed snapshot.
 - **Classify the protocol.** Lending, AMM/DEX, vault/yield, staking, bridge, governance,
-  NFT/marketplace, stablecoin, perps — each has characteristic failure modes. Name it.
+  NFT/marketplace, stablecoin, perps — each has characteristic failure modes. Name it, then pull
+  the matching **protocol playbook** if one exists: `protocol-erc4626-vault.md` (vault/yield,
+  share-accounting), `protocol-lending.md` (lending/CDP), `protocol-amm-dex.md` (AMM/DEX). These
+  are class-specific bug catalogues to run alongside the generic ecosystem vectors.
 - **Identify the actors and their powers.** Users, LPs, owner/admin, governance, keepers,
   oracles, relayers. For each privileged role: what can it do, and what happens if its key
   is compromised or malicious? Centralization *is* a finding. Go past "this role is trusted":

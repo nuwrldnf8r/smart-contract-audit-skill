@@ -85,7 +85,7 @@ common way audits miss the important bugs.
    - `.rs` with `anchor_lang`, `solana_program`, `#[program]`, `Accounts` → **Solana** → read `references/solana-vectors.md`
    - A repo may contain more than one. Audit each with its own reference. For an ecosystem with
      no dedicated catalogue here (Move/Sui/Aptos, Cairo/Starknet, ink!/Substrate, Soroban,
-     Clarity), fall back to `methodology.md` + the cross-cutting/economic analysis, say so in the
+     Clarity), fall back to `references/methodology.md` + the cross-cutting/economic analysis, say so in the
      report, and label the coverage **partial** — don't imply full ecosystem support.
 2. **Build a mental model of the system.** What does it do (lending, AMM, vault, bridge,
    staking, governance, NFT)? Where does value live? Who are the privileged actors? What
@@ -100,6 +100,14 @@ common way audits miss the important bugs.
    "only the owner can pause", "you can never withdraw more than you deposited"). Most
    high-severity findings are a way to violate one of these. Write them down explicitly —
    they drive the whole review.
+
+Once you've classified the protocol (step 2), also read the matching **protocol playbook** if one
+exists — it's the dense, class-specific bug catalogue on top of the generic vectors:
+`references/protocol-erc4626-vault.md` (tokenized/yield vaults, LST/LRT, share-accounting),
+`references/protocol-lending.md` (money markets, CDPs, leverage), `references/protocol-amm-dex.md`
+(constant-product / stableswap / concentrated-liquidity). Other classes (staking, bridge,
+governance, perps, NFT) have no dedicated playbook yet — use the cross-cutting analysis in
+`references/methodology.md` and the cross-chain/governance sections of the ecosystem vectors.
 
 Then read `references/methodology.md` for the full review procedure, and the relevant
 ecosystem reference(s). Read `references/severity-rubric.md` before assigning severities,
@@ -118,10 +126,10 @@ Follow `references/methodology.md` in full. In brief:
    Solidity, `cargo audit`/clippy for Rust). Treat their output as leads to verify, not
    findings. See `references/tooling.md`. If tools aren't installed, say so and proceed
    with manual review — do not block.
-3. **Manual review** — go function by function against the ecosystem vector reference AND
-   reason from the invariants. This is where the real findings come from. Trace untrusted
-   input to sensitive sinks; trace value flows; question every external call and every
-   privileged path.
+3. **Manual review** — go function by function against the ecosystem vector reference AND the
+   matching **protocol playbook** (vault / lending / AMM, if applicable) AND the invariants. This
+   is where the real findings come from. Trace untrusted input to sensitive sinks; trace value
+   flows; question every external call and every privileged path.
 4. **Cross-cutting analysis** — economic/logic attacks (flash-loan-amplified, oracle
    manipulation, rounding/precision, MEV/ordering), composability and integration risk
    (weird ERC20s, callback tokens, upgrade/proxy risk, account abstraction / EIP-7702), and
@@ -170,6 +178,10 @@ spans all ecosystems):
 - `references/deployment-live-state.md` — auditing deployment configuration and live on-chain
   state (proxy/upgrade authority, timelock delay, multisig health, init-once, chain-ID address
   correctness). Use for any deployed or about-to-deploy system.
+- `references/protocol-erc4626-vault.md`, `references/protocol-lending.md`,
+  `references/protocol-amm-dex.md` — **protocol-class playbooks**: dense, class-specific bug
+  catalogues (share inflation & rounding; oracle/liquidation/bad-debt; AMM invariant & spot-price
+  manipulation). Read the one(s) matching the protocol type, on top of the ecosystem vectors.
 - `assets/report-template.md` — the standard audit report format (incl. Assumption Ledger and
   per-finding Proof / Reproduction). Copy and fill it.
 
