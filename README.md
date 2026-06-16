@@ -49,8 +49,16 @@ The skill follows a seven-phase methodology (Phases 0–6):
 6. **Adversarial self-verification** — re-derive each finding's exploit path before it ships;
    remove anything that can't be substantiated.
 
+Around that core it also treats the target repo as untrusted (no unsandboxed code execution,
+key/secret hygiene, prompt-injection awareness), audits **deployment and live on-chain state**
+(proxy/upgrade authority, timelock delay, multisig health, chain-ID address correctness), and
+records an **assumption ledger** plus a **proof/reproduction** for High/Critical findings.
+
 The vulnerability catalogues are grounded in the OWASP Smart Contract Top 10 (2026), the OWASP
-SCWE weakness registry, the Sealevel attack classes (Solana), and CosmWasm audit practice.
+SCWE weakness registry, the Sealevel attack classes (Solana), and CosmWasm audit practice. EVM
+coverage includes post-Pectra account abstraction (EIP-7702 / ERC-4337 / EIP-1271). VMs without a
+dedicated catalogue (Move, Cairo, Soroban, ink!, Clarity) get a general logic/economic review only
+— treat those results as partial.
 
 ## Repository layout
 
@@ -62,11 +70,13 @@ SCWE weakness registry, the Sealevel attack classes (Solana), and CosmWasm audit
 ├── skills/
 │   └── smart-contract-audit/      # the skill itself
 │       ├── SKILL.md               # entry point: workflow + routing
-│       ├── references/            # methodology, per-ecosystem vectors, severity, tooling
-│       └── assets/                # the audit report template
+│       ├── references/            # methodology, per-ecosystem vectors, severity, tooling,
+│       │                          #   repo-execution safety, deployment/live-state
+│       └── assets/                # the audit report template (incl. assumption ledger + PoC)
 ├── evals/                         # reproducible evaluation harness
 │   ├── easy/                      # classic planted-bug contracts + ground truth
 │   ├── hard/                      # subtle planted-bug contracts + ground truth
+│   ├── negative/                  # safe-but-suspicious contracts (false-positive resistance)
 │   └── trigger-evals.json         # should-trigger / should-not-trigger queries
 └── docs/
     └── install.md                 # full setup, including the static-analysis tools

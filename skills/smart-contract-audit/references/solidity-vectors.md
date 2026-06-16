@@ -168,12 +168,30 @@ that acts on `payload` without checking `srcChainId`/`srcAddress` against an all
 canonical bridge drain. Watch for chains where messages can be re-delivered or reordered, and for
 optimistic bridges where a fraud-proof window must elapse before funds are released.
 
-**Account abstraction (ERC-4337 / smart-contract wallets).** Don't assume `msg.sender` is an EOA.
-`tx.origin == msg.sender` checks (used as "is this a direct call / not a contract") break for
-4337 wallets and can lock them out or be bypassed. Signature checks must support **EIP-1271**
-(`isValidSignature`) for contract wallets, not only `ecrecover`. In a 4337 context, be wary of
-validation-phase storage-access rules and of trusting the bundler/paymaster; `tx.origin` is the
-bundler, not the user.
+**Account abstraction & delegated EOAs (EIP-7702, ERC-4337, EIP-1271).** Don't assume `msg.sender`
+or `tx.origin` is a code-free EOA. Where EIP-7702 is activated (Ethereum mainnet post-Pectra, and
+other chains as they adopt it — confirm for the target chain), an EOA can delegate to contract code,
+so the "EOAs have no code" assumption no longer holds. This breaks a class of legacy checks and adds
+new surface:
+- **`tx.origin` / `msg.sender == tx.origin` is no longer an EOA test.** Code that uses it for
+  authorization, or as an anti-contract / anti-reentrancy ("only humans") guard, is broken — a
+  7702-delegated EOA is an `origin` *and* runs code, and can re-enter. Treat any such check as a
+  finding (ties back to SC01 `tx.origin` auth).
+- **Assume any caller can be contract-like.** Callback hooks, reentrancy, and EIP-1271
+  (`isValidSignature`) signature checks can now come from an address that looks like an EOA. Code
+  that branches on "is this an EOA" (`extcodesize == 0`, which is also bypassable mid-construction)
+  cannot assume code-free behavior.
+- **Delegation init & front-running.** For 7702-style delegated accounts and 4337 wallets, check
+  that delegation/initialization cannot be front-run into an attacker-chosen implementation, and
+  that the delegate target's storage-layout and CREATE2/immutability assumptions hold (storage
+  collisions between successive delegate implementations).
+- **Authorization tuple `chainId`.** A 7702 authorization with `chainId = 0` is valid on *every*
+  chain — cross-chain delegation replay. Flag signing flows that allow it.
+- **4337 / smart-account scope.** Session-key scope and spending limits, module install/uninstall
+  paths, paymaster trust boundaries, validation-phase storage-access rules, and `validateUserOp`
+  not over-trusting `userOp` fields — and remember `tx.origin` is the bundler, not the user.
+- **EIP-1271.** When verifying contract signatures, handle the magic-value return correctly, guard
+  against signature replay (nonce/domain), and don't assume a 1271 signer is immutable.
 
 ## Token integration & "weird ERC20s"
 A huge share of integration bugs come from assuming all tokens behave like a textbook ERC20:
@@ -207,7 +225,7 @@ Keep findings at roughly this length and concreteness — enough to prove the pa
 
 ## Quick grep/triage hints
 Use these to locate surface fast, then review manually — never report from grep alone:
-- `tx.origin` → auth bug candidate
+- `tx.origin`, `msg.sender == tx.origin` → auth bug / broken EOA-check (EIP-7702) candidate
 - `delegatecall`, `.call{value:` → external-call / proxy review
 - `unchecked`, `assembly` → arithmetic review
 - `block.timestamp`, `blockhash`, `prevrandao` → randomness/time
@@ -216,6 +234,6 @@ Use these to locate surface fast, then review manually — never report from gre
 - `onERC721Received`, `tokensReceived`, `safeTransfer` → callback reentrancy
 - `latestRoundData`, `sequencerUptimeFeed` → oracle staleness / L2 sequencer-uptime check
 - `srcChainId`, `srcAddress`, `lzReceive`, `_ccipReceive`, `receiveWormholeMessages` → cross-chain source validation
-- `isValidSignature`, `tx.origin == msg.sender` → EIP-1271 / account-abstraction assumptions
+- `isValidSignature`, `extcodesize`, `delegate`, `authorization` → EIP-1271 / account-abstraction / EIP-7702 review
 - `pragma solidity ^` (floating, SCWE-060) and old versions (SCWE-061)
 - `# @version` / `.vy` → Vyper: confirm the exact compiler version (codegen/reentrancy history)
