@@ -21,6 +21,12 @@ evals/
 │   │   ├── cw_rewards.rs           # reply/SubMsg reentrancy, non-functional replay guard, migrate
 │   │   └── sol_staking.rs          # account substitution, init_if_needed reinit, unchecked CPI authority
 │   └── ground-truth.json
+├── negative/                 # SAFE-but-suspicious contracts — false-positive resistance
+│   ├── contracts/
+│   │   ├── SafeVault.sol             # CEI-correct withdraw, display-only spot price, bounded admin
+│   │   ├── safe_rewards.rs           # CosmWasm: effects-before-SubMsg, version-checked migrate
+│   │   └── safe_vault.rs             # Solana: manually-validated UncheckedAccount, signer + has_one
+│   └── ground-truth.json             # should_not_flag: patterns the audit must NOT report as bugs
 └── trigger-evals.json        # should-trigger / should-not-trigger queries for the description
 ```
 
@@ -44,6 +50,12 @@ Each `ground-truth.json` lists, per contract, the planted findings the audit sho
   ]
 }
 ```
+
+The **negative** set inverts the grading: instead of `ground_truth` (bugs to find) each entry has
+`should_not_flag` — patterns that *look* like classic bugs but are safe on inspection. A pass means
+the audit does **not** report them as real findings (Low or above); explaining why a pattern is safe,
+or noting it as defensive Informational, is fine. This set grades severity calibration / false-positive
+resistance directly — the thing the hard set only measures indirectly.
 
 `trigger-evals.json` is a flat list of `{ "query": "...", "should_trigger": true|false }` used to
 check that the skill's description fires on real audit requests and stays quiet on near-misses

@@ -1,0 +1,52 @@
+{
+  "skill_name": "smart-contract-audit",
+  "set": "negative",
+  "purpose": "False-positive / over-claiming resistance. Each contract contains patterns that LOOK like classic bugs but are SAFE on inspection. The skill's headline strength is severity calibration; these grade it. A pass = the audit does NOT report the listed safe patterns as vulnerabilities (Low or above). Naming a pattern only to explain why it is safe, or as a defensive Informational note, is acceptable. Reporting any item under should_not_flag as a real (Low/Medium/High/Critical) finding is a failure.",
+  "evals": [
+    {
+      "id": 0,
+      "name": "solidity-safe-vault",
+      "prompt": "Audit this Solidity vault (SafeVault.sol). It holds user deposits. Give me a findings report with severities — be thorough but precise.",
+      "files": ["contracts/SafeVault.sol"],
+      "should_not_flag": {
+        "N1_withdraw_reentrancy": "withdraw() looks reentrant but updates balanceOf BEFORE the external transfer (checks-effects-interactions) and uses SafeERC20 — not exploitable; must NOT be a reentrancy finding",
+        "N2_spot_oracle": "displayPriceX18() reads single-pair spot reserves but the value is view-only for display and never feeds accounting/borrow/liquidation — must NOT be reported as oracle manipulation",
+        "N3_admin_fee": "setFeeBps() is owner-only but bounded by MAX_FEE_BPS (1%) and behind Ownable2Step — bounded admin power, not a centralization/rug finding",
+        "N4_fee_on_transfer": "deposit() credits the measured balance delta, so fee-on-transfer tokens cannot over-credit — must NOT be reported as a weird-ERC20 accounting bug"
+      },
+      "acceptable_informational": [
+        "Noting that displayPriceX18 must never be wired into accounting in future changes",
+        "Noting MAX_FEE_BPS as a deliberate bound"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "cosmwasm-safe-rewards",
+      "prompt": "Please do a deep security review of this CosmWasm reward distributor (safe_rewards.rs). It holds a reward pool. Find everything, with severities.",
+      "files": ["contracts/safe_rewards.rs"],
+      "should_not_flag": {
+        "N1_reply_reentrancy": "execute_claim sets CLAIMED=true and zeroes REWARD BEFORE dispatching the payout SubMsg, so a re-entrant claim sees claimed state — must NOT be reported as reply/SubMsg reentrancy or double-claim",
+        "N2_migrate_unguarded": "migrate() checks cw2 contract name and bumps version, and migrate authorization is chain-enforced (code admin) — must NOT be reported as an unguarded/unauthorized migrate",
+        "N3_unsnapshotted_pool": "no shared pool total is re-read across re-entrant claims because effects commit before payout — must NOT be reported as an unsnapshotted reward-pool bug"
+      },
+      "acceptable_informational": [
+        "Noting that the deployment's code-admin (governance multisig) is the trust assumption for migrate"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "solana-safe-vault",
+      "prompt": "Security review of this Anchor vault program (safe_vault.rs). Assume a motivated attacker. Findings + severities, be aggressive.",
+      "files": ["contracts/safe_vault.rs"],
+      "should_not_flag": {
+        "N1_unchecked_dest": "dest is an UncheckedAccount but is manually validated (SPL Token program owner, mint == vault.mint, token-owner == signing authority) — must NOT be reported as an account-validation / substitution bug",
+        "N2_missing_signer": "authority is a Signer and vault has_one = authority binds it — must NOT be reported as a missing-signer or account-substitution finding",
+        "N3_unchecked_arithmetic": "balance uses checked_sub with an error on underflow — must NOT be reported as unchecked arithmetic / underflow",
+        "N4_cpi_authority": "the CPI transfer authority is a program PDA derived from fixed seeds and signed via seeds — must NOT be reported as an unchecked/forgeable CPI authority"
+      },
+      "acceptable_informational": [
+        "Noting that manual TokenAccount deserialization is correct but Account<'info, TokenAccount> would be more idiomatic"
+      ]
+    }
+  ]
+}
