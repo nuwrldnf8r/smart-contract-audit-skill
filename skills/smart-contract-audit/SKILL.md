@@ -85,7 +85,7 @@ common way audits miss the important bugs.
    - `.rs` with `anchor_lang`, `solana_program`, `#[program]`, `Accounts` → **Solana** → read `references/solana-vectors.md`
    - A repo may contain more than one. Audit each with its own reference. For an ecosystem with
      no dedicated catalogue here (Move/Sui/Aptos, Cairo/Starknet, ink!/Substrate, Soroban,
-     Clarity), fall back to `methodology.md` + the cross-cutting/economic analysis, say so in the
+     Clarity), fall back to `references/methodology.md` + the cross-cutting/economic analysis, say so in the
      report, and label the coverage **partial** — don't imply full ecosystem support.
 2. **Build a mental model of the system.** What does it do (lending, AMM, vault, bridge,
    staking, governance, NFT)? Where does value live? Who are the privileged actors? What
@@ -107,7 +107,7 @@ exists — it's the dense, class-specific bug catalogue on top of the generic ve
 `references/protocol-lending.md` (money markets, CDPs, leverage), `references/protocol-amm-dex.md`
 (constant-product / stableswap / concentrated-liquidity). Other classes (staking, bridge,
 governance, perps, NFT) have no dedicated playbook yet — use the cross-cutting analysis in
-`methodology.md` and the cross-chain/governance sections of the ecosystem vectors.
+`references/methodology.md` and the cross-chain/governance sections of the ecosystem vectors.
 
 Then read `references/methodology.md` for the full review procedure, and the relevant
 ecosystem reference(s). Read `references/severity-rubric.md` before assigning severities,
