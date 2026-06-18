@@ -3,6 +3,13 @@
 All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.2.1] — 2026-06-16
+
+### Changed
+- `methodology.md` Phase 6: the >500 LoC subagent heuristic is now framed as **ecosystem-relative**
+  — Rust/Anchor (Solana) and CosmWasm pack far more logic per line, so calibrate to complexity and
+  value-at-risk, not raw line count.
+
 ## [1.2.0] — 2026-06-16
 
 ### Added

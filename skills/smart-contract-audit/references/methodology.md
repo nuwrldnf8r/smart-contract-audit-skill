@@ -207,6 +207,10 @@ Before delivering, re-read the report as a skeptic trying to discredit it:
 - Spawn a subagent to independently re-derive the top findings from the code (without seeing
   your writeup) and reconcile differences when the codebase is non-trivial — a useful rule of
   thumb is roughly >500 LoC, code holding meaningful value, or any time you've flagged a
-  Critical. For a tiny, low-stakes snippet this is overkill; a careful self-re-read suffices.
+  Critical. Treat the line count as **ecosystem-relative**: 500 lines of Solidity is substantial,
+  but Rust/Anchor (Solana) and CosmWasm pack far more logic per line — a few hundred dense lines of
+  account validation, CPI wiring, or reply/SubMsg handling can warrant a subagent well under that.
+  Calibrate to complexity and value-at-risk, not raw line count. For a tiny, low-stakes snippet a
+  subagent is overkill; a careful self-re-read suffices.
 - State residual risk and any coverage limitations plainly (what was and wasn't reviewed, and
   any findings that need manual follow-up), so the reader knows exactly what the audit covered.
